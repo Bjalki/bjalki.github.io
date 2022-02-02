@@ -1,0 +1,121 @@
+<html>
+<body>
+<p id = "location"></p>
+<script>
+   var loc = document.getElementById("location");
+   var jsn;
+   if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(getPos);
+   }
+   function getPos(position) {
+      loc.innerHTML = "Latitude: " + position.coords.latitude +
+      " </br> Longitude: " + position.coords.longitude;
+      const http = new XMLHttpRequest()
+
+      var today = new Date();
+        var dd = String(today.getDate()).padStart(2, '0');
+        var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+        var yyyy = today.getFullYear();
+
+        today = mm + '/' + dd + '/' + yyyy;
+
+
+      http.open("GET", "https://api.sunrise-sunset.org/json?lat="+ position.coords.latitude + "&lng=" + position.coords.longitude + "&date=" + today);
+      http.send()
+
+    http.onload = () => {//console.log(http.responseText);
+        jsn =JSON.parse( http.responseText );
+        //sunrise = JSON.parse(jsn);
+        
+        jsn=jsn.results;
+        sunrise = (jsn.sunrise).substring(0, String(jsn.sunrise).indexOf(':'));
+        sunrise = parseInt(sunrise) - 5 + String(jsn.sunrise).substring(String(jsn.sunrise).indexOf(':'), String(jsn.sunrise).indexOf('M') - 1) + "AM";
+        sunrise.replace("AM", "PM");
+
+        sunset = (jsn.sunset).substring(0, String(jsn.sunset).indexOf(':'));
+        sunset = parseInt(sunset) - 5 + String(jsn.sunset).substring(String(jsn.sunrise).indexOf(':'));
+        console.log(sunrise);
+        
+        loc.innerHTML += "</br></br>Date: "+ today + "</br>Sunrise: " + sunrise;
+        loc.innerHTML += "</br>Sunset: " + sunset;
+        //loc.innerHTML += "\n" + http.responseText;
+
+        hour1 = sunrise.substring(0, sunrise.indexOf(':'));
+        hour2 = parseInt(sunset.substring(0, sunset.indexOf(':'))) +12;
+
+        time = (hour2 - parseInt(hour1)) * 60;
+        sbreak = sunrise.substring(sunrise.indexOf(':' + 1));
+        ssbreak = sunset.substring(sunset.indexOf(':' + 1));
+        time += parseInt(sunset.substring(ssbreak, sunrise.indexOf(':'))) - parseInt(sunrise.substring(sbreak, sunrise.indexOf(':')));
+        time = Math.round(time/12);
+
+
+        //console.log(time);
+
+        days = ["Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn"];
+        means = ["The Sun - rules the heart. Day and hours of the sun are favorable to the destruction of noxious growth. Weeds, briars, and bushes cut off in the waning moon on the day or hour of the sun will be better destroyed than if done at any other time. Wood cut for burning during day or hour of the sun will burn longer and better. Success, fortune, fatherhood, and happiness are energies associated with the Sun. Our pride, our will, our purpose, our goals, all fall under the rulership of the Sun. A favorable day/hour for healing and protection work or uncovering the identity of a witch or powwowing for men's troubles.", "The Moon - rules the breasts and womb. Seeds planet during the day or hour of the moon germinate quickly and ensure an abundant yield. Make sure all gardening is done before full moon. If done from full to dark moon, blooms may be abundant but there will be little yield of fruit or vegetable. Motherhood, the home, children, family, things that make us feel safe, and secrets are energies associated with the Moon. Favorable day/hour for divination or powwowing for women's troubles and children.","Mars - rules the head. Seeds planted in this sign produce vines or stalks. All crops that grow above ground should be planted in the day/hour of Mars during the waxing moon. Energy, activity, leadership, survival, courage, battles, war, enemies, all fall under the influence of Mars. Powwow for burns and cuts or bleeding wounds. Anti-hex work can be done in hour/day of Mars. ","Mercury - rules the arms, lungs, and hands. Fertilize the ground during the day or hour of Mercury. Best time to plant above-ground vegetables. Communication, breathing, travel, thoughts, writing, speech, siblings, education, and technology are energies associated with Mercury. Favorable time for divination, powwowing for babies troubles, and distance healing.","Jupiter - rules the thighs and hips. Day/hour of Jupiter is unfavorable for planting above ground crops. Potatoes and radishes will do well if planted in hour/day of Jupiter during waning or dark moon. Exploration, honesty, idealism, expansion, wisdom, wealth, visions, faith, greed are all under the rulership of Jupiter. Talismans for catching thieves are favored at this time.","Venus - rules the throat and neck. Will do well for all root crops of quick growth. Plant potatoes during the waning moon in the day/hour of Venus for best yield. Venus rules such things as giving, sharing, compromise, beauty, love, value, art, money, and the things that bring us happiness. Powwow for throat and neck issues. Make talismans for finance or love" ,"Saturn - rules the knees and teeth. Produces rapid growth of roots or stalks if planted in hour/day of Saturn. Ambition, restriction, banishing, curse-breaking, verhexing are all favored during hour/day of Saturn. During dark moon, work to return hexes to the witch. During waxing moon, work for protection."];
+        
+        //I should have used a map for the meanings but I'm dumb and too lazy to fix it
+        //this is all a single file anyway so I'm not to worried about efficiency 
+
+        Sun = ['Sun', 'Venus', 'Mercury', 'Moon', 'Saturn', 'Jupiter', 'Mars','Sun', 'Venus', 'Mercury', 'Moon','Saturn'];
+        Moon = ['Moon', 'Saturn', 'Jupiter', 'Mars', 'Sun', 'Venus', 'Mercury','Moon', 'Saturn', 'Jupiter', 'Mars', 'Sun'];
+        Mars = ['Mars', 'Sun', 'Venus', 'Mercury', 'Moon', 'Saturn', 'Jupiter','Mars', 'Sun', 'Venus', 'Mercury', 'Moon'];
+        Mercury = ['Mercury', 'Moon', 'Saturn', 'Jupiter', 'Mars', 'Sun', 'Venus','Mercury', 'Moon', 'Saturn', 'Jupiter', 'Mars'];
+        Jupiter = ['Jupiter', 'Mars', 'Sun', 'Venus', 'Mercury', 'Moon', 'Saturn','Jupiter', 'Mars', 'Sun', 'Venus', 'Mercury'];
+        Venus = ['Venus', 'Mercury', 'Moon', 'Saturn', 'Jupiter', 'Mars', 'Sun', 'Venus', 'Mercury', 'Moon', 'Saturn', 'Jupiter'];
+        Saturn = ['Saturn', 'Jupiter', 'Mars', 'Sun', 'Venus', 'Mercury', 'Moon', 'Saturn', 'Jupiter', 'Mars', 'Sun', 'Venus'];
+
+         dayHours = [Sun, Moon, Mars, Mercury, Jupiter, Venus, Saturn];
+
+        final = new Map();
+
+        final.set("Sun", "A favorable hour for healing and protection work or uncovering the identity of a witch or powwowing for men's troubles.");
+        final.set("Moon", "Favorable hour for divination or powwowing for women's troubles and children.");
+        final.set("Mars", "Powwow for burns and cuts or bleeding wounds. Anti-hex work can be done in hour/day of Mars.");
+        final.set("Mercury", "Favorable time for divination, powwowing for babies troubles, and distance healing.");
+        final.set("Jupiter", "Exploration, honesty, idealism, expansion, wisdom, wealth, visions, faith, greed are all under the rulership of Jupiter. Talismans for catching thieves are favored at this time.");
+        final.set("Venus", "Powwow for throat and neck issues. Make talismans for finance or love.");
+        final.set("Saturn", "Ambition, restriction, banishing, curse-breaking, verhexing are all favored during hour/day of Saturn.");
+
+        var tD = new Date();
+        weekDay = tD.getDay();
+
+      theHour = hour1;
+      theMin = String(sunrise).substring(String(sunrise).indexOf(":"));
+      theMin = theMin.substring(1,3);
+      loc.innerHTML += "</br></br>Today is ruled by " + days[weekDay];
+      loc.innerHTML += "</br>" + means[weekDay];
+
+      loc.innerHTML += "</br></br>Solar Hours</br>"
+      loc.innerHTML += theHour + ":" + theMin + " " + days[weekDay];
+      loc.innerHTML += " - " + final.get(days[weekDay]);
+      console.log(theHour + ":" + theMin);
+      theMin = parseInt(theMin);
+
+      for(i = 1; i< 12; i++){
+         if(theMin+time>=60){
+            theMin = theMin+time - 60;
+            if (theHour==12)theHour = 0;
+            theHour++;
+         }else{
+            theMin = theMin+time;
+         }
+         if(theMin<10) loc.innerHTML += "</br>" +theHour + ":0" + theMin + " " + dayHours[weekDay][i];
+         else loc.innerHTML += "</br>" +theHour + ":" + theMin + " " + dayHours[weekDay][i];
+         loc.innerHTML += " - " + final.get(dayHours[weekDay][i]);
+
+      }
+        
+    }
+  
+
+   }
+</script>
+<script>
+    
+
+    
+</script>
+</body>
+</html> 
